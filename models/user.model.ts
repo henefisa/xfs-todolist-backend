@@ -1,12 +1,12 @@
 import mongoose, { Document, Schema } from "mongoose";
 import bcrypt from "bcrypt";
 
-interface IUser {
+export interface IUser {
   username: string;
   password: string;
 }
 
-interface IUserDocument extends IUser, Document {
+export interface IUserDocument extends IUser, Document {
   checkPassword: (password: string) => Promise<boolean>;
 }
 

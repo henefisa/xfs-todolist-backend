@@ -6,6 +6,7 @@ dotenv.config();
 
 // routes
 import userRoute from "./routes/user.route";
+import todoRoute from "./routes/todo.route";
 
 const app = express();
 const port = process.env.PORT || 7878;
@@ -13,6 +14,7 @@ const port = process.env.PORT || 7878;
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use("/user", userRoute);
+app.use("/todo", todoRoute);
 
 app.use((_request: Request, _response: Response, next: NextFunction) => {
   const error = createError();
