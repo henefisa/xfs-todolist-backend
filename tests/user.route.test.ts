@@ -182,13 +182,101 @@ describe("POST /user/login", () => {
   });
 });
 
+describe("POST /user/refresh-token", () => {
+  test("send user refresh token", async () => {
+    const registerResponse = await supertest(app).post("/user/register").send({
+      username: "Sample",
+      password: "sample",
+    });
+    expect(registerResponse.body.status).toBe("okay");
+    expect(registerResponse.body.elements.username).toBe("sample");
+    expect(typeof registerResponse.body.elements.password).toBe("string");
+
+    const loginResponse = await supertest(app).post("/user/login").send({
+      username: "Sample",
+      password: "sample",
+    });
+
+    expect(typeof loginResponse.body.accessToken).toBe("string");
+    expect(typeof loginResponse.body.refreshToken).toBe("string");
+
+    const refreshTokenResponse = await supertest(app)
+      .post("/user/refresh-token")
+      .send({
+        refreshToken: loginResponse.body.refreshToken,
+      });
+
+    expect(typeof refreshTokenResponse.body.accessToken).toBe("string");
+    expect(typeof refreshTokenResponse.body.refreshToken).toBe("string");
+  });
+
+  test("without refresh token", async () => {
+    const refreshTokenResponse = await supertest(app)
+      .post("/user/refresh-token")
+      .send({});
+    expect(refreshTokenResponse.body.status).toBe(400);
+    expect(refreshTokenResponse.body.message).toBe("Bad Request");
+  });
+
+  test("using random access token", async () => {
+    const refreshTokenResponse = await supertest(app)
+      .post("/user/refresh-token")
+      .send({
+        refreshToken: "This is random refresh token",
+      });
+
+    expect(refreshTokenResponse.body.status).toBe(500);
+    expect(refreshTokenResponse.body.message).toBe("jwt malformed");
+  });
+});
+
+describe("DELETE /user/logout", () => {
+  test("logout user", async () => {
+    const registerResponse = await supertest(app).post("/user/register").send({
+      username: "Sample",
+      password: "sample",
+    });
+    expect(registerResponse.body.status).toBe("okay");
+    expect(registerResponse.body.elements.username).toBe("sample");
+    expect(typeof registerResponse.body.elements.password).toBe("string");
+
+    const loginResponse = await supertest(app).post("/user/login").send({
+      username: "Sample",
+      password: "sample",
+    });
+
+    expect(typeof loginResponse.body.accessToken).toBe("string");
+    expect(typeof loginResponse.body.refreshToken).toBe("string");
+
+    const logoutResponse = await supertest(app).delete("/user/logout").send({
+      refreshToken: loginResponse.body.refreshToken,
+    });
+
+    expect(logoutResponse.body.message).toBe("Logout");
+  });
+
+  test("logout without refresh token", async () => {
+    const logoutResponse = await supertest(app).delete("/user/logout").send({});
+    expect(logoutResponse.body.status).toBe(400);
+    expect(logoutResponse.body.message).toBe("Bad Request");
+  });
+
+  test("logout with random access token", async () => {
+    const refreshTokenResponse = await supertest(app)
+      .post("/user/refresh-token")
+      .send({
+        refreshToken: "This is random refresh token",
+      });
+
+    expect(refreshTokenResponse.body.status).toBe(500);
+    expect(refreshTokenResponse.body.message).toBe("jwt malformed");
+  });
+});
+
 describe("GET random route", () => {
   test("get random", async () => {
-    await supertest(app)
-      .get("/this/is/random")
-      .then((response) => {
-        expect(response.body.status).toBe(500);
-        expect(response.body.message).toBe("Not Found!");
-      });
+    const response = await supertest(app).get("/this/is/random");
+    expect(response.body.status).toBe(500);
+    expect(response.body.message).toBe("Not Found!");
   });
 });

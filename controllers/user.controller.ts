@@ -53,7 +53,6 @@ const refreshToken = async (
     }
 
     const { userId } = await verifyRefreshToken(bodyRefreshToken);
-
     client.get(userId.toString(), (error) => {
       if (error) {
         throw new createError.InternalServerError();
