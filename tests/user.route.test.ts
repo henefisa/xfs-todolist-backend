@@ -18,17 +18,14 @@ afterEach((done) => {
 
 describe("POST /user/register", () => {
   test("create user", async () => {
-    await supertest(app)
-      .post("/user/register")
-      .send({
-        username: "Sample",
-        password: "123123",
-      })
-      .then((response) => {
-        expect(response.body.status).toBe("okay");
-        expect(response.body.elements.username).toBe("sample");
-        expect(typeof response.body.elements.password).toBe("string");
-      });
+    const response = await supertest(app).post("/user/register").send({
+      username: "Sample",
+      password: "123123",
+    });
+
+    expect(response.body.status).toBe("okay");
+    expect(response.body.elements.username).toBe("sample");
+    expect(typeof response.body.elements.password).toBe("string");
   });
 
   test("create same user", async () => {
@@ -36,178 +33,162 @@ describe("POST /user/register", () => {
       .post("/user/register")
       .send({ username: "sample", password: "password" });
 
-    await supertest(app)
-      .post("/user/register")
-      .send({
-        username: "sample",
-        password: "123123",
-      })
-      .then((response) => {
-        expect(response.body.status).toBe(409);
-        expect(response.body.message).toBe(`Username sample is already used!`);
-      });
+    const response = await supertest(app).post("/user/register").send({
+      username: "sample",
+      password: "123123",
+    });
+
+    expect(response.body.status).toBe(409);
+    expect(response.body.message).toBe(`Username sample is already used!`);
   });
 
   test("create user without username", async () => {
-    await supertest(app)
+    const response = await supertest(app)
       .post("/user/register")
-      .send({ password: "sample" })
-      .then((response) => {
-        expect(response.body.status).toBe(500);
-        expect(response.body.message).toBe(`"username" is required`);
-      });
+      .send({ password: "sample" });
+
+    expect(response.body.status).toBe(500);
+    expect(response.body.message).toBe(`"username" is required`);
   });
 
   test("create user without password", async () => {
-    await supertest(app)
+    const response = await supertest(app)
       .post("/user/register")
-      .send({ username: "sample" })
-      .then((response) => {
-        expect(response.body.status).toBe(500);
-        expect(response.body.message).toBe(`"password" is required`);
-      });
+      .send({ username: "sample" });
+
+    expect(response.body.status).toBe(500);
+    expect(response.body.message).toBe(`"password" is required`);
   });
 
   test("create user with password length is 2", async () => {
-    await supertest(app)
+    const response = await supertest(app)
       .post("/user/register")
-      .send({ username: "sample", password: "12" })
-      .then((response) => {
-        expect(response.body.status).toBe(500);
-        expect(response.body.message).toBe(
-          `"password" length must be at least 4 characters long`
-        );
-      });
+      .send({ username: "sample", password: "12" });
+    expect(response.body.status).toBe(500);
+    expect(response.body.message).toBe(
+      `"password" length must be at least 4 characters long`
+    );
   });
 
   test("create user with password length is 33", async () => {
-    await supertest(app)
+    const response = await supertest(app)
       .post("/user/register")
       .send({
         username: "sample",
         password: new Array(33).fill(~~Math.random()).join(""),
-      })
-      .then((response) => {
-        expect(response.body.status).toBe(500);
-        expect(response.body.message).toBe(
-          `"password" length must be less than or equal to 32 characters long`
-        );
       });
+
+    expect(response.body.status).toBe(500);
+    expect(response.body.message).toBe(
+      `"password" length must be less than or equal to 32 characters long`
+    );
   });
 
   test("create user with password length is between 4 and 32", async () => {
-    await supertest(app)
+    const response = await supertest(app)
       .post("/user/register")
       .send({
         username: "Sample",
         password: new Array(~~(Math.random() * (32 - 4 + 1) + 4))
           .fill(~~Math.random())
           .join(""),
-      })
-      .then((response) => {
-        expect(response.body.status).toBe("okay");
-        expect(response.body.elements.username).toBe("sample");
-        expect(typeof response.body.elements.password).toBe("string");
       });
+
+    expect(response.body.status).toBe("okay");
+    expect(response.body.elements.username).toBe("sample");
+    expect(typeof response.body.elements.password).toBe("string");
   });
 });
 
 describe("POST /user/login", () => {
   test("login user", async () => {
-    await supertest(app)
-      .post("/user/register")
-      .send({
-        username: "Sample",
-        password: "sample",
-      })
-      .then((response) => {
-        expect(response.body.status).toBe("okay");
-        expect(response.body.elements.username).toBe("sample");
-        expect(typeof response.body.elements.password).toBe("string");
-      });
+    const registerResponse = await supertest(app).post("/user/register").send({
+      username: "Sample",
+      password: "sample",
+    });
+    expect(registerResponse.body.status).toBe("okay");
+    expect(registerResponse.body.elements.username).toBe("sample");
+    expect(typeof registerResponse.body.elements.password).toBe("string");
 
-    await supertest(app)
-      .post("/user/login")
-      .send({
-        username: "Sample",
-        password: "sample",
-      })
-      .then((response) => {
-        expect(typeof response.body.accessToken).toBe("string");
-      });
+    const loginResponse = await supertest(app).post("/user/login").send({
+      username: "Sample",
+      password: "sample",
+    });
+
+    expect(typeof loginResponse.body.accessToken).toBe("string");
+  });
+
+  test("login uncreated user", async () => {
+    const loginResponse = await supertest(app).post("/user/login").send({
+      username: "Sample",
+      password: "sample",
+    });
+    expect(loginResponse.body.status).toBe(404);
+    expect(loginResponse.body.message).toBe("User not registered");
   });
 
   test("login user without username", async () => {
-    await supertest(app)
-      .post("/user/register")
-      .send({
-        username: "Sample",
-        password: "sample",
-      })
-      .then((response) => {
-        expect(response.body.status).toBe("okay");
-        expect(response.body.elements.username).toBe("sample");
-        expect(typeof response.body.elements.password).toBe("string");
-      });
+    const registerResponse = await supertest(app).post("/user/register").send({
+      username: "Sample",
+      password: "sample",
+    });
 
-    await supertest(app)
-      .post("/user/login")
-      .send({
-        password: "sample",
-      })
-      .then((response) => {
-        expect(response.body.status).toBe(500);
-        expect(response.body.message).toBe('"username" is required');
-      });
+    expect(registerResponse.body.status).toBe("okay");
+    expect(registerResponse.body.elements.username).toBe("sample");
+    expect(typeof registerResponse.body.elements.password).toBe("string");
+
+    const loginResponse = await supertest(app).post("/user/login").send({
+      password: "sample",
+    });
+
+    expect(loginResponse.body.status).toBe(500);
+    expect(loginResponse.body.message).toBe('"username" is required');
   });
 
   test("login user without password", async () => {
-    await supertest(app)
-      .post("/user/register")
-      .send({
-        username: "Sample",
-        password: "sample",
-      })
-      .then((response) => {
-        expect(response.body.status).toBe("okay");
-        expect(response.body.elements.username).toBe("sample");
-        expect(typeof response.body.elements.password).toBe("string");
-      });
+    const registerResponse = await supertest(app).post("/user/register").send({
+      username: "Sample",
+      password: "sample",
+    });
 
-    await supertest(app)
-      .post("/user/login")
-      .send({
-        username: "sample",
-      })
-      .then((response) => {
-        expect(response.body.status).toBe(500);
-        expect(response.body.message).toBe('"password" is required');
-      });
+    expect(registerResponse.body.status).toBe("okay");
+    expect(registerResponse.body.elements.username).toBe("sample");
+    expect(typeof registerResponse.body.elements.password).toBe("string");
+
+    const loginResponse = await supertest(app).post("/user/login").send({
+      username: "sample",
+    });
+
+    expect(loginResponse.body.status).toBe(500);
+    expect(loginResponse.body.message).toBe('"password" is required');
   });
 
   test("login user with wrong password", async () => {
-    await supertest(app)
-      .post("/user/register")
-      .send({
-        username: "Sample",
-        password: "sample",
-      })
-      .then((response) => {
-        expect(response.body.status).toBe("okay");
-        expect(response.body.elements.username).toBe("sample");
-        expect(typeof response.body.elements.password).toBe("string");
-      });
+    const registerResponse = await supertest(app).post("/user/register").send({
+      username: "Sample",
+      password: "sample",
+    });
 
+    expect(registerResponse.body.status).toBe("okay");
+    expect(registerResponse.body.elements.username).toBe("sample");
+    expect(typeof registerResponse.body.elements.password).toBe("string");
+
+    const loginResponse = await supertest(app).post("/user/login").send({
+      username: "sample",
+      password: "wrongpassword",
+    });
+    expect(loginResponse.body.status).toBe(401);
+    expect(loginResponse.body.message).toBe("Unauthorized");
+  });
+});
+
+describe("GET random route", () => {
+  test("get random", async () => {
     await supertest(app)
-      .post("/user/login")
-      .send({
-        username: "sample",
-        password: "wrongpassword",
-      })
+      .get("/this/is/random")
       .then((response) => {
-        console.log(response.body);
-        expect(response.body.status).toBe(401);
-        expect(response.body.message).toBe("Unauthorized");
+        expect(response.body.status).toBe(500);
+        expect(response.body.message).toBe("Not Found!");
       });
   });
 });
