@@ -1,6 +1,7 @@
 import JWT from "jsonwebtoken";
 import createError from "http-errors";
 import { Request, Response, NextFunction } from "express";
+import client from "./connectRedis";
 
 const signAccessToken = async (userId: string) => {
   return new Promise((resolve, reject) => {
@@ -78,6 +79,7 @@ const signRefreshToken = async (userId: string) => {
         if (error) {
           reject(error);
         }
+        client.set(userId, token as string, "EX", 60 * 60 * 24 * 30);
         resolve(token);
       }
     );
