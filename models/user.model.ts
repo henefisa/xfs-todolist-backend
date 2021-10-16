@@ -10,7 +10,7 @@ interface IUser {
 }
 
 interface IUserDocument extends IUser, Document {
-  checkPassword: (password: string) => Promise<void>;
+  checkPassword: (password: string) => Promise<boolean>;
 }
 
 const UserSchema: Schema<IUser> = new mongoose.Schema({
@@ -39,4 +39,5 @@ UserSchema.methods.checkPassword = async function (password: string) {
   } catch (error) {}
 };
 
+export { UserSchema, UsersConnection };
 export default UsersConnection.model<IUserDocument>("users", UserSchema);

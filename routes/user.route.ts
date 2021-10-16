@@ -2,6 +2,7 @@ import express, { Request, Response, NextFunction } from "express";
 import createError from "http-errors";
 import { userValidate } from "../helpers/validation";
 import { signAccessToken } from "../helpers/jwt_service";
+
 import User from "../models/user.model";
 
 const route = express.Router();
@@ -60,7 +61,8 @@ route.post(
         throw new createError.NotFound("User not registered");
       }
 
-      const isValid = user.checkPassword(password);
+      const isValid = await user.checkPassword(password);
+
       if (!isValid) {
         throw new createError.Unauthorized();
       }

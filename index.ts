@@ -16,7 +16,7 @@ app.use("/user", userRoute);
 app.use((_request: Request, _response: Response, next: NextFunction) => {
   const error = createError();
   error.status = 500;
-  error.message = "Failed!";
+  error.message = "Not Found!";
   next(error);
 });
 
@@ -35,7 +35,5 @@ const server = app.listen(port, () => {
   console.log(`App is listened on port ${port}`);
 });
 
-process.on("SIGINT", () => {
-  console.log("exit");
-  server.close();
-});
+export default app;
+export { server };
