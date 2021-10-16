@@ -1,8 +1,5 @@
 import mongoose, { Document, Schema } from "mongoose";
 import bcrypt from "bcrypt";
-import createConnection from "../helpers/createMongoConnection";
-
-const UsersConnection = createConnection(`mongodb://localhost:27017/users`);
 
 interface IUser {
   username: string;
@@ -39,5 +36,5 @@ UserSchema.methods.checkPassword = async function (password: string) {
   } catch (error) {}
 };
 
-export { UserSchema, UsersConnection };
-export default UsersConnection.model<IUserDocument>("users", UserSchema);
+export { UserSchema };
+export default mongoose.model<IUserDocument>("users", UserSchema);

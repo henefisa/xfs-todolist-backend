@@ -1,6 +1,7 @@
 import express, { Request, Response, NextFunction } from "express";
 import createError, { HttpError } from "http-errors";
 import dotenv from "dotenv";
+import mongoose from "mongoose";
 dotenv.config();
 
 // routes
@@ -30,6 +31,17 @@ app.use(
     response.json({ status: error.status || 500, message: error.message });
   }
 );
+
+if (!process.env.TEST) {
+  mongoose
+    .connect("mongodb://localhost:27017/xfs")
+    .then(() => {
+      console.log("Database connected");
+    })
+    .catch((error) => {
+      console.error(error);
+    });
+}
 
 const server = app.listen(port, () => {
   console.log(`App is listened on port ${port}`);

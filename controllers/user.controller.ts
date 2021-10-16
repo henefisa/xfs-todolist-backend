@@ -53,6 +53,13 @@ const refreshToken = async (
     }
 
     const { userId } = await verifyRefreshToken(bodyRefreshToken);
+
+    client.get(userId.toString(), (error) => {
+      if (error) {
+        throw new createError.InternalServerError();
+      }
+    });
+
     const accessToken = await signAccessToken(userId);
     const refreshToken = await signRefreshToken(userId);
     response.json({
@@ -88,6 +95,7 @@ const login = async (
     }
     const accessToken = await signAccessToken(user._id);
     const refreshToken = await signRefreshToken(user._id);
+
     response.json({
       accessToken,
       refreshToken,
@@ -109,7 +117,7 @@ const logout = async (
     }
 
     const { userId } = await verifyRefreshToken(bodyRefreshToken);
-    client.del(userId, (error) => {
+    client.del(userId.toString(), (error) => {
       if (error) {
         throw new createError.InternalServerError();
       }

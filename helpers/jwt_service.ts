@@ -68,7 +68,7 @@ const signRefreshToken = async (userId: string) => {
     }
 
     const options = {
-      expiresIn: "30d",
+      expiresIn: "10d",
     };
 
     JWT.sign(
@@ -79,7 +79,12 @@ const signRefreshToken = async (userId: string) => {
         if (error) {
           reject(error);
         }
-        client.set(userId, token as string, "EX", 60 * 60 * 24 * 30);
+        client.set(userId.toString(), token as string, (error) => {
+          if (error) {
+            reject(error);
+          }
+        });
+        client.expire(userId.toString(), 60 * 60 * 24 * 10);
         resolve(token);
       }
     );

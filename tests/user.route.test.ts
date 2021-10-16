@@ -1,10 +1,9 @@
-import User from "../models/user.model";
 import mongoose from "mongoose";
 import supertest from "supertest";
 import app, { server } from "../index";
 
 beforeEach((done) => {
-  mongoose.connect(`mongodb://localhost:27017/users`, () => {
+  mongoose.connect(`mongodb://localhost:27017/jestDb`, () => {
     done();
   });
 });

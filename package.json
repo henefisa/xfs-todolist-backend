@@ -5,7 +5,7 @@
   "license": "MIT",
   "scripts": {
     "serve": "nodemon ./index.ts",
-    "test": "jest --verbose --coverage --forceExit --watchAll"
+    "test": "TEST=true jest --verbose --coverage --forceExit --watchAll"
   },
   "devDependencies": {
     "@types/bcrypt": "^5.0.0",
