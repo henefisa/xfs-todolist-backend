@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-const createConnection = (uri: string) => {
+const createMongoConnection = (uri: string) => {
   const connection = mongoose.createConnection(uri);
 
   connection.on("connected", () => {
@@ -18,4 +18,4 @@ const createConnection = (uri: string) => {
   return connection;
 };
 
-export default createConnection;
+export default createMongoConnection;

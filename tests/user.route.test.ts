@@ -116,6 +116,7 @@ describe("POST /user/login", () => {
     });
 
     expect(typeof loginResponse.body.accessToken).toBe("string");
+    expect(typeof loginResponse.body.refreshToken).toBe("string");
   });
 
   test("login uncreated user", async () => {

@@ -1,6 +1,6 @@
 import mongoose, { Document, Schema } from "mongoose";
 import bcrypt from "bcrypt";
-import createConnection from "../helpers/createConnection";
+import createConnection from "../helpers/createMongoConnection";
 
 const UsersConnection = createConnection(`mongodb://localhost:27017/users`);
 

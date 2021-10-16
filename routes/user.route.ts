@@ -1,7 +1,12 @@
 import express, { Request, Response, NextFunction } from "express";
 import createError from "http-errors";
 import { userValidate } from "../helpers/validation";
-import { signAccessToken } from "../helpers/jwt_service";
+import {
+  signAccessToken,
+  signRefreshToken,
+  verifyRefreshToken,
+} from "../helpers/jwt_service";
+import client from "../helpers/connectRedis";
 
 import User from "../models/user.model";
 
@@ -40,9 +45,23 @@ route.post(
 
 route.post(
   "/refresh-token",
-  (request: Request, response: Response, next: NextFunction) => {
-    console.log("Refresh token function");
-    response.send("Refresh token function");
+  async (request: Request, response: Response, next: NextFunction) => {
+    try {
+      const { refreshToken: bodyRefreshToken } = request.body;
+      if (!bodyRefreshToken) {
+        throw new createError.BadRequest();
+      }
+
+      const { userId } = await verifyRefreshToken(bodyRefreshToken);
+      const accessToken = await signAccessToken(userId);
+      const refreshToken = await signRefreshToken(userId);
+      response.json({
+        accessToken,
+        refreshToken,
+      });
+    } catch (error) {
+      next(error);
+    }
   }
 );
 
@@ -67,8 +86,10 @@ route.post(
         throw new createError.Unauthorized();
       }
       const accessToken = await signAccessToken(user._id);
+      const refreshToken = await signRefreshToken(user._id);
       response.json({
         accessToken,
+        refreshToken,
       });
     } catch (error) {
       next(error);
@@ -76,11 +97,28 @@ route.post(
   }
 );
 
-route.post(
+route.delete(
   "/logout",
-  (request: Request, response: Response, next: NextFunction) => {
-    console.log("Logout function");
-    response.send("Logout function");
+  async (request: Request, response: Response, next: NextFunction) => {
+    try {
+      const { refreshToken: bodyRefreshToken } = request.body;
+      if (!bodyRefreshToken) {
+        throw new createError.BadRequest();
+      }
+
+      const { userId } = await verifyRefreshToken(bodyRefreshToken);
+      client.del(userId, (error) => {
+        if (error) {
+          throw new createError.InternalServerError();
+        }
+
+        response.json({
+          message: "Logout",
+        });
+      });
+    } catch (error) {
+      next(error);
+    }
   }
 );
 
