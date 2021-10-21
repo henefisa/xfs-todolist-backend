@@ -18,7 +18,7 @@ const register = async (
     const { username, password } = request.body;
     const { error } = userValidate(request.body);
     if (error) {
-      throw createError(error.details[0].message);
+      throw new createError[400](error.details[0].message);
     }
 
     const isExist = await User.findOne({
@@ -32,10 +32,7 @@ const register = async (
     const user = new User({ username, password });
     const savedUser = await user.save();
 
-    response.json({
-      status: "okay",
-      elements: savedUser,
-    });
+    response.status(201).json(savedUser);
   } catch (error) {
     next(error);
   }
@@ -78,7 +75,7 @@ const login = async (
   try {
     const { error } = userValidate(request.body);
     if (error) {
-      throw createError(error.details[0].message);
+      throw new createError[400](error.details[0].message);
     }
 
     const { username, password } = request.body;
@@ -120,11 +117,9 @@ const logout = async (
       if (error) {
         throw new createError.InternalServerError();
       }
-
-      response.json({
-        message: "Logout",
-      });
     });
+
+    response.status(204).json();
   } catch (error) {
     next(error);
   }

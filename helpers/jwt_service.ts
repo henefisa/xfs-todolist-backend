@@ -23,7 +23,7 @@ const signAccessToken = async (userId: string) => {
       options,
       (error, token) => {
         if (error) {
-          reject(error);
+          return reject(new createError[401](error.message));
         }
         resolve(token);
       }
@@ -77,11 +77,11 @@ const signRefreshToken = async (userId: string) => {
       options,
       (error, token) => {
         if (error) {
-          reject(error);
+          reject(new createError[401](error.message));
         }
         client.set(userId.toString(), token as string, (error) => {
           if (error) {
-            reject(error);
+            reject(new createError[500](error.message));
           }
         });
         client.expire(userId.toString(), 60 * 60 * 24 * 10);
@@ -91,18 +91,18 @@ const signRefreshToken = async (userId: string) => {
   });
 };
 
-const verifyRefreshToken = (refreshToekn: string): Promise<any> => {
+const verifyRefreshToken = (refreshToken: string): Promise<any> => {
   return new Promise((resolve, reject) => {
     if (!process.env.REFRESH_TOKEN_SECRET) {
       return reject(new createError.InternalServerError());
     }
 
     JWT.verify(
-      refreshToekn,
+      refreshToken,
       process.env.REFRESH_TOKEN_SECRET,
       (error, payload) => {
         if (error) {
-          return reject(error);
+          return reject(new createError[401](error.message));
         }
         resolve(payload);
       }

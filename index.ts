@@ -30,7 +30,7 @@ app.use(
     response: Response,
     next: NextFunction
   ) => {
-    response.json({ status: error.status || 500, message: error.message });
+    response.status(error.status || 500).json({ message: error.message });
   }
 );
 
@@ -43,11 +43,10 @@ if (!process.env.TEST) {
     .catch((error) => {
       console.error(error);
     });
+
+  app.listen(port, () => {
+    console.log(`App is listened on port ${port}`);
+  });
 }
 
-const server = app.listen(port, () => {
-  console.log(`App is listened on port ${port}`);
-});
-
 export default app;
-export { server };

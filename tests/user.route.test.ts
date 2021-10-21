@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 import supertest from "supertest";
-import app, { server } from "../index";
+import app from "../index";
 
 beforeEach((done) => {
   mongoose.connect(`mongodb://localhost:27017/jestDb`, () => {
@@ -12,7 +12,6 @@ afterEach((done) => {
   mongoose.connection.db.dropDatabase(() => {
     mongoose.connection.close(() => done());
   });
-  server.close();
 });
 
 describe("POST /user/register", () => {
@@ -22,9 +21,9 @@ describe("POST /user/register", () => {
       password: "123123",
     });
 
-    expect(response.body.status).toBe("okay");
-    expect(response.body.elements.username).toBe("sample");
-    expect(typeof response.body.elements.password).toBe("string");
+    expect(response.status).toBe(201);
+    expect(response.body.username).toBe("sample");
+    expect(typeof response.body.password).toBe("string");
   });
 
   test("create same user", async () => {
@@ -37,7 +36,7 @@ describe("POST /user/register", () => {
       password: "123123",
     });
 
-    expect(response.body.status).toBe(409);
+    expect(response.status).toBe(409);
     expect(response.body.message).toBe(`Username sample is already used!`);
   });
 
@@ -46,7 +45,7 @@ describe("POST /user/register", () => {
       .post("/user/register")
       .send({ password: "sample" });
 
-    expect(response.body.status).toBe(500);
+    expect(response.status).toBe(400);
     expect(response.body.message).toBe(`"username" is required`);
   });
 
@@ -55,7 +54,7 @@ describe("POST /user/register", () => {
       .post("/user/register")
       .send({ username: "sample" });
 
-    expect(response.body.status).toBe(500);
+    expect(response.status).toBe(400);
     expect(response.body.message).toBe(`"password" is required`);
   });
 
@@ -63,7 +62,7 @@ describe("POST /user/register", () => {
     const response = await supertest(app)
       .post("/user/register")
       .send({ username: "sample", password: "12" });
-    expect(response.body.status).toBe(500);
+    expect(response.status).toBe(400);
     expect(response.body.message).toBe(
       `"password" length must be at least 4 characters long`
     );
@@ -77,7 +76,7 @@ describe("POST /user/register", () => {
         password: new Array(33).fill(~~Math.random()).join(""),
       });
 
-    expect(response.body.status).toBe(500);
+    expect(response.status).toBe(400);
     expect(response.body.message).toBe(
       `"password" length must be less than or equal to 32 characters long`
     );
@@ -93,9 +92,9 @@ describe("POST /user/register", () => {
           .join(""),
       });
 
-    expect(response.body.status).toBe("okay");
-    expect(response.body.elements.username).toBe("sample");
-    expect(typeof response.body.elements.password).toBe("string");
+    expect(response.status).toBe(201);
+    expect(response.body.username).toBe("sample");
+    expect(typeof response.body.password).toBe("string");
   });
 });
 
@@ -105,9 +104,9 @@ describe("POST /user/login", () => {
       username: "Sample",
       password: "sample",
     });
-    expect(registerResponse.body.status).toBe("okay");
-    expect(registerResponse.body.elements.username).toBe("sample");
-    expect(typeof registerResponse.body.elements.password).toBe("string");
+    expect(registerResponse.status).toBe(201);
+    expect(registerResponse.body.username).toBe("sample");
+    expect(typeof registerResponse.body.password).toBe("string");
 
     const loginResponse = await supertest(app).post("/user/login").send({
       username: "Sample",
@@ -123,7 +122,7 @@ describe("POST /user/login", () => {
       username: "Sample",
       password: "sample",
     });
-    expect(loginResponse.body.status).toBe(404);
+    expect(loginResponse.status).toBe(404);
     expect(loginResponse.body.message).toBe("User not registered");
   });
 
@@ -133,15 +132,15 @@ describe("POST /user/login", () => {
       password: "sample",
     });
 
-    expect(registerResponse.body.status).toBe("okay");
-    expect(registerResponse.body.elements.username).toBe("sample");
-    expect(typeof registerResponse.body.elements.password).toBe("string");
+    expect(registerResponse.status).toBe(201);
+    expect(registerResponse.body.username).toBe("sample");
+    expect(typeof registerResponse.body.password).toBe("string");
 
     const loginResponse = await supertest(app).post("/user/login").send({
       password: "sample",
     });
 
-    expect(loginResponse.body.status).toBe(500);
+    expect(loginResponse.status).toBe(400);
     expect(loginResponse.body.message).toBe('"username" is required');
   });
 
@@ -151,15 +150,15 @@ describe("POST /user/login", () => {
       password: "sample",
     });
 
-    expect(registerResponse.body.status).toBe("okay");
-    expect(registerResponse.body.elements.username).toBe("sample");
-    expect(typeof registerResponse.body.elements.password).toBe("string");
+    expect(registerResponse.status).toBe(201);
+    expect(registerResponse.body.username).toBe("sample");
+    expect(typeof registerResponse.body.password).toBe("string");
 
     const loginResponse = await supertest(app).post("/user/login").send({
       username: "sample",
     });
 
-    expect(loginResponse.body.status).toBe(500);
+    expect(loginResponse.status).toBe(400);
     expect(loginResponse.body.message).toBe('"password" is required');
   });
 
@@ -169,15 +168,15 @@ describe("POST /user/login", () => {
       password: "sample",
     });
 
-    expect(registerResponse.body.status).toBe("okay");
-    expect(registerResponse.body.elements.username).toBe("sample");
-    expect(typeof registerResponse.body.elements.password).toBe("string");
+    expect(registerResponse.status).toBe(201);
+    expect(registerResponse.body.username).toBe("sample");
+    expect(typeof registerResponse.body.password).toBe("string");
 
     const loginResponse = await supertest(app).post("/user/login").send({
       username: "sample",
       password: "wrongpassword",
     });
-    expect(loginResponse.body.status).toBe(401);
+    expect(loginResponse.status).toBe(401);
     expect(loginResponse.body.message).toBe("Unauthorized");
   });
 });
@@ -188,9 +187,9 @@ describe("POST /user/refresh-token", () => {
       username: "Sample",
       password: "sample",
     });
-    expect(registerResponse.body.status).toBe("okay");
-    expect(registerResponse.body.elements.username).toBe("sample");
-    expect(typeof registerResponse.body.elements.password).toBe("string");
+    expect(registerResponse.status).toBe(201);
+    expect(registerResponse.body.username).toBe("sample");
+    expect(typeof registerResponse.body.password).toBe("string");
 
     const loginResponse = await supertest(app).post("/user/login").send({
       username: "Sample",
@@ -214,7 +213,7 @@ describe("POST /user/refresh-token", () => {
     const refreshTokenResponse = await supertest(app)
       .post("/user/refresh-token")
       .send({});
-    expect(refreshTokenResponse.body.status).toBe(400);
+    expect(refreshTokenResponse.status).toBe(400);
     expect(refreshTokenResponse.body.message).toBe("Bad Request");
   });
 
@@ -225,7 +224,7 @@ describe("POST /user/refresh-token", () => {
         refreshToken: "This is random refresh token",
       });
 
-    expect(refreshTokenResponse.body.status).toBe(500);
+    expect(refreshTokenResponse.status).toBe(401);
     expect(refreshTokenResponse.body.message).toBe("jwt malformed");
   });
 });
@@ -236,9 +235,9 @@ describe("DELETE /user/logout", () => {
       username: "Sample",
       password: "sample",
     });
-    expect(registerResponse.body.status).toBe("okay");
-    expect(registerResponse.body.elements.username).toBe("sample");
-    expect(typeof registerResponse.body.elements.password).toBe("string");
+    expect(registerResponse.status).toBe(201);
+    expect(registerResponse.body.username).toBe("sample");
+    expect(typeof registerResponse.body.password).toBe("string");
 
     const loginResponse = await supertest(app).post("/user/login").send({
       username: "Sample",
@@ -251,13 +250,12 @@ describe("DELETE /user/logout", () => {
     const logoutResponse = await supertest(app).delete("/user/logout").send({
       refreshToken: loginResponse.body.refreshToken,
     });
-
-    expect(logoutResponse.body.message).toBe("Logout");
+    expect(logoutResponse.status).toBe(204);
   });
 
   test("logout without refresh token", async () => {
     const logoutResponse = await supertest(app).delete("/user/logout").send({});
-    expect(logoutResponse.body.status).toBe(400);
+    expect(logoutResponse.status).toBe(400);
     expect(logoutResponse.body.message).toBe("Bad Request");
   });
 
@@ -268,7 +266,7 @@ describe("DELETE /user/logout", () => {
         refreshToken: "This is random refresh token",
       });
 
-    expect(refreshTokenResponse.body.status).toBe(500);
+    expect(refreshTokenResponse.status).toBe(401);
     expect(refreshTokenResponse.body.message).toBe("jwt malformed");
   });
 });
@@ -276,7 +274,7 @@ describe("DELETE /user/logout", () => {
 describe("GET random route", () => {
   test("get random", async () => {
     const response = await supertest(app).get("/this/is/random");
-    expect(response.body.status).toBe(500);
+    expect(response.status).toBe(500);
     expect(response.body.message).toBe("Not Found!");
   });
 });
