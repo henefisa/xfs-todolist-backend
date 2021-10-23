@@ -13,7 +13,7 @@ const addTodo = async (
   try {
     const { error } = todoValidate(request.body);
     if (error) {
-      throw createError(error.details[0].message);
+      throw new createError[400](error.details[0].message);
     }
 
     delete request.body.date;
@@ -40,7 +40,7 @@ const editTodo = async (
 
     const { error } = todoValidate(request.body);
     if (error) {
-      throw createError(error.details[0].message);
+      throw new createError[400](error.details[0].message);
     }
 
     if (!mongoose.isValidObjectId(todoId)) {

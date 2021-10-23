@@ -33,7 +33,9 @@ UserSchema.pre<IUser>("save", async function (next) {
 UserSchema.methods.checkPassword = async function (password: string) {
   try {
     return await bcrypt.compare(password, this.password);
-  } catch (error) {}
+  } catch (error) {
+    return error;
+  }
 };
 
 export { UserSchema };

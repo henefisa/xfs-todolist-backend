@@ -1,4 +1,4 @@
-import JWT from "jsonwebtoken";
+import JWT, { JwtPayload } from "jsonwebtoken";
 import createError from "http-errors";
 import { Request, Response, NextFunction } from "express";
 import client from "./connectRedis";
@@ -91,7 +91,7 @@ const signRefreshToken = async (userId: string) => {
   });
 };
 
-const verifyRefreshToken = (refreshToken: string): Promise<any> => {
+const verifyRefreshToken = (refreshToken: string): Promise<JwtPayload> => {
   return new Promise((resolve, reject) => {
     if (!process.env.REFRESH_TOKEN_SECRET) {
       return reject(new createError.InternalServerError());
@@ -104,7 +104,7 @@ const verifyRefreshToken = (refreshToken: string): Promise<any> => {
         if (error) {
           return reject(new createError[401](error.message));
         }
-        resolve(payload);
+        resolve(payload as JwtPayload);
       }
     );
   });
