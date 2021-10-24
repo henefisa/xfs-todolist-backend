@@ -36,7 +36,7 @@ app.use(
 
 if (!process.env.TEST) {
   mongoose
-    .connect("mongodb://mongodb:27017/xfs")
+    .connect("mongodb://mongodb:27017/test")
     .then(() => {
       console.log("Database connected");
     })

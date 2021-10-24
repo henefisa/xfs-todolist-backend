@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import supertest from "supertest";
 import app from "../index";
+import { isRegistered, isLoggedIn } from "./customMatchers";
 
 beforeEach((done) => {
   mongoose.connect(`mongodb://mongodb:27017/jestDb`, () => {
@@ -14,23 +15,26 @@ afterEach((done) => {
   });
 });
 
+expect.extend({
+  isRegistered,
+  isLoggedIn,
+});
+
 describe("POST /todo/add", () => {
   test("create todo", async () => {
     const registerResponse = await supertest(app).post("/user/register").send({
       username: "Sample",
       password: "sample",
     });
-    expect(registerResponse.status).toBe(201);
-    expect(registerResponse.body.username).toBe("sample");
-    expect(typeof registerResponse.body.password).toBe("string");
+
+    expect(registerResponse).isRegistered("sample");
 
     const loginResponse = await supertest(app).post("/user/login").send({
       username: "Sample",
       password: "sample",
     });
-    expect(loginResponse.status).toBe(200);
-    expect(typeof loginResponse.body.accessToken).toBe("string");
-    expect(typeof loginResponse.body.refreshToken).toBe("string");
+
+    expect(loginResponse).isLoggedIn();
 
     const createTodoResponse = await supertest(app)
       .post("/todo/add")
@@ -58,17 +62,15 @@ describe("POST /todo/add", () => {
       username: "Sample",
       password: "sample",
     });
-    expect(registerResponse.status).toBe(201);
-    expect(registerResponse.body.username).toBe("sample");
-    expect(typeof registerResponse.body.password).toBe("string");
+
+    expect(registerResponse).isRegistered("sample");
 
     const loginResponse = await supertest(app).post("/user/login").send({
       username: "Sample",
       password: "sample",
     });
 
-    expect(typeof loginResponse.body.accessToken).toBe("string");
-    expect(typeof loginResponse.body.refreshToken).toBe("string");
+    expect(loginResponse).isLoggedIn();
 
     const createTodoResponse = await supertest(app)
       .post("/todo/add")
