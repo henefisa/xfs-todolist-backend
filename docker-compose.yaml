@@ -13,7 +13,9 @@ services:
     environment:
       NODE_ENV: development
       PORT: 6969
-
+    depends_on:
+      - redis
+      - mongodb
     networks:
       - local
   redis:

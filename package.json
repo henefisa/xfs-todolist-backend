@@ -5,7 +5,9 @@
   "license": "MIT",
   "scripts": {
     "serve": "nodemon ./index.ts",
-    "test": "TEST=true jest --verbose --coverage --forceExit --watchAll"
+    "test": "TEST=true jest --verbose --coverage --forceExit --watchAll",
+    "test:docker": "docker-compose run --rm server yarn test",
+    "docker": "docker-compose up -d"
   },
   "devDependencies": {
     "@types/bcrypt": "^5.0.0",

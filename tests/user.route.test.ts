@@ -3,7 +3,7 @@ import supertest from "supertest";
 import app from "../index";
 
 beforeEach((done) => {
-  mongoose.connect(`mongodb://localhost:27017/jestDb`, () => {
+  mongoose.connect(`mongodb://mongodb:27017/jestDb`, () => {
     done();
   });
 });
