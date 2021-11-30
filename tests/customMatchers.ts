@@ -1,4 +1,5 @@
 import { Response } from "supertest";
+
 const isRegistered = (received: Response, username: string) => {
   let pass = true;
   let message = ``;

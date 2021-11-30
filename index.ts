@@ -2,6 +2,7 @@ import express, { Request, Response, NextFunction } from "express";
 import createError, { HttpError } from "http-errors";
 import dotenv from "dotenv";
 import mongoose from "mongoose";
+import cors from "cors";
 dotenv.config();
 
 // routes
@@ -13,6 +14,7 @@ const port = process.env.PORT || 7878;
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(cors());
 app.use("/user", userRoute);
 app.use("/todo", todoRoute);
 

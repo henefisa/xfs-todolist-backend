@@ -37,6 +37,7 @@ describe("POST /user/register", () => {
       password: "123123",
     });
 
+    expect(response).not.isRegistered("sample 1");
     expect(response.status).toBe(409);
     expect(response.body.message).toBe(`Username sample is already used!`);
   });
@@ -121,6 +122,7 @@ describe("POST /user/login", () => {
       username: "Sample",
       password: "sample",
     });
+    expect(loginResponse).not.isLoggedIn();
     expect(loginResponse.status).toBe(404);
     expect(loginResponse.body.message).toBe("User not registered");
   });

@@ -81,3 +81,48 @@ describe("POST /todo/add", () => {
     expect(createTodoResponse.body.message).toBe(`"content" is required`);
   });
 });
+
+describe("GET /todo", () => {
+  test("Get all todo", async () => {
+    const registerResponse = await supertest(app).post("/user/register").send({
+      username: "Sample",
+      password: "sample",
+    });
+
+    expect(registerResponse).isRegistered("sample");
+
+    const loginResponse = await supertest(app).post("/user/login").send({
+      username: "Sample",
+      password: "sample",
+    });
+
+    expect(loginResponse).isLoggedIn();
+
+    const createTodoResponse = await supertest(app)
+      .post("/todo/add")
+      .set("Authorization", `Bearer ${loginResponse.body.accessToken}`)
+      .send({
+        content: "Sample content",
+      });
+
+    expect(createTodoResponse.status).toBe(201);
+    expect(createTodoResponse.body.status).toBe(false);
+    expect(createTodoResponse.body.priority).toBe(0);
+
+    const getAllTodoResponse = await supertest(app)
+      .get("/todo")
+      .set("Authorization", `Bearer ${loginResponse.body.accessToken}`);
+
+    expect(getAllTodoResponse.status).toBe(200);
+    const todo = getAllTodoResponse.body.todos[0];
+    expect(typeof todo.userId).toBe("string");
+    expect(new Date(todo.date)).toBeInstanceOf(Date);
+    expect(todo).toEqual(
+      expect.objectContaining({
+        content: "Sample content",
+        status: false,
+        priority: 0,
+      })
+    );
+  });
+});
