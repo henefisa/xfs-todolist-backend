@@ -125,4 +125,16 @@ const logout = async (
   }
 };
 
-export { register, refreshToken, login, logout };
+const isAuthenticated = (
+  request: Request,
+  response: Response,
+  next: NextFunction
+) => {
+  try {
+    response.status(204).json({});
+  } catch (error) {
+    next(error);
+  }
+};
+
+export { register, refreshToken, login, logout, isAuthenticated };
